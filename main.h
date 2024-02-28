@@ -1,40 +1,50 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#include <bits/types/stack_t.h>
 #include <stdio.h>
+
+#include <errno.h>
+
 #include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
+
 #include <sys/wait.h>
-#include <time.h>
-#include <unistd.h>
-#include <sys/stat.h>
+
+#include <string.h>
+
 #include <fcntl.h>
+
+#include <sys/types.h>
+
+#include <unistd.h>
+
+#include <sys/stat.h>
+
+#include <limits.h>
+
+#define DELIM " \n\t\r\a\""
 
 extern char **environ;
 
-char *get_line(void);
+void interact_mode(char *name);
 
-char *get_stream(void);
+void non_interact_mode(char *name);
 
-char **parse_command_line(char *);
+int _cd(char **ags);
 
-void interactive_mode(char *name);
+char *read_line(void);
 
-void non_interactive_mode(char *name);
+char **get_tokens(char *cmd);
 
-void execute(char *command, char *name);
+int _env(char **ags);
 
-int execute_command(char **command, char *name);
+int handle_exit(char **ags);
 
-char *get_command_file(char *path);
+int exec_command(char **agv, char *cmd);
 
-size_t count_tokens(char *str, char *delim);
+int s_call(char **ags, char *cmd);
 
-char **tokenize(char *str, char *delim);
+int access_command(char *path, char **ags);
 
-char **get_tokens(char *str, char *delim, int number_of_tokens);
+char *get_input(void);
 
 #endif /* MAIN_H */
-

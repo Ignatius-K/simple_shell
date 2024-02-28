@@ -1,81 +1,76 @@
 #include "main.h"
 
 /**
- * main - entry to the program
- * @argc: number of args
- * @argv: arguments
+ * main - entry
+ * @agc: argument count
+ * @ags: arguments
  *
  * Return: int
  */
-int main(int argc __attribute__((unused)), char **argv)
+int main(int agc, char **ags)
 {
-	if (isatty(STDIN_FILENO))
-	{
-		interactive_mode(argv[0]);
-	}
+	if (isatty(STDIN_FILENO) == 1)
+		interact_mode(ags[agc - 1]);
 	else
-	{
-		non_interactive_mode(argv[0]);
-	}
-	return (EXIT_SUCCESS);
-}
-
-/**
- * interactive_mode - handles interactive mode
- * @name: name of program
- *
- * Return: nothing
- */
-void interactive_mode(char *name)
-{
-	char *line_ptr = NULL;
-
-	printf("$ ");
-	while (1)
-	{
-		line_ptr = get_line();
-		execute(line_ptr, name);
-		free(line_ptr);
-		printf("$ ");
-	}
-	/* free(line_ptr); */
+		non_interact_mode(ags[agc - 1]);
+	return (0);
 }
 
 
 /**
- * non_interactive_mode - handles non-interactive
- * @name: name of program
- *
+ * non_interact_mode - none interactive mode
+ * @name: prog name
  * Return: nothing
  */
-void non_interactive_mode(char *name)
+void non_interact_mode(char *name)
 {
-	char *line_ptr = NULL;
+	char *input;
+	char **ags;
+	int status;
 
 	while (1)
 	{
-		line_ptr = get_stream();
-		execute(line_ptr, name);
+		write(0, "$ ", 2);
+		input = get_input();
+		ags = get_tokens(input);
+		status = exec_command(ags, name);
+		free(input);
+		free(ags);
+		if (status >= 0)
+		{
+			exit(status);
+		} else
+			continue;
 	}
-	free(line_ptr);
 }
 
 
+/**
+ * interact_mode - interactive mode
+ * @name: program name
+ *
+ * Return: nothing
+ */
+void interact_mode(char *name)
+{
+	char *input;
+	char **ags;
+	int status;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	while (1)
+	{
+		write(0, "$ ", 2);
+		input = get_input();
+		ags = get_tokens(input);
+		status = exec_command(ags, name);
+		free(input);
+		free(ags);
+		if (status >= 0)
+		{
+			exit(status);
+		} else
+		{
+			continue;
+		}
+	}
+}

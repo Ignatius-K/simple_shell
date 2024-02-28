@@ -1,154 +1,96 @@
 #include "main.h"
-#include <stdio.h>
-#include <stdlib.h>
-
 
 /**
- * get_line - gets line from stdin
+ * get_input - gets input
  *
- * Return: string
+ * Return: input
  */
-char *get_line()
+char *get_input(void)
 {
-	char *line = NULL;
-	size_t buff_size = 0;
+	int buffer_size = 1024;
+	int i = 0;
+	char *input = malloc(sizeof(char) * buffer_size);
+	int _char;
 
-	if (getline(&line, &buff_size, stdin) == -1)
+	if (input == NULL)
 	{
-		if (feof(stdin))
+		fprintf(stderr, "Memory alloc error");
+		exit(EXIT_FAILURE);
+	}
+	while (1)
+	{
+		_char = getchar();
+		if (_char == EOF)
 		{
-			free(line);
+			free(input);
 			exit(EXIT_SUCCESS);
+		}
+		else if (_char == '\n')
+		{
+			input[i] = '\0';
+			return (input);
 		}
 		else
 		{
-			free(line);
-			perror("error read line");
-			exit(EXIT_FAILURE);
+			input[i] = _char;
+		}
+		i++;
+		if (i >= buffer_size)
+		{
+			buffer_size += buffer_size;
+			input = realloc(input, buffer_size);
+			if (input == NULL)
+			{
+				fprintf(stderr, "Memory realloc error");
+				exit(EXIT_FAILURE);
+			}
 		}
 	}
-	return (line);
-}
-
-/**
- * parse_command_line - parses the user input
- * @str: string from stdin
- *
- * Return: parsed command in tokens
- */
-char **parse_command_line(char *str)
-{
-	int str_len;
-	char **command;
-
-	str_len = strlen(str);
-	str[str_len - 1] = '\0';
-
-	command = tokenize(str, " ");
-	return (command);
 }
 
 
 /**
- * tokenize - breaks string into tokens
- * @str: string to breaks
- * @delim: delimitor
+ * get_tokens - gets tokens
+ * @input: user input
  *
- * Return: pointer to token array
+ * Return: tokens
  */
-char **tokenize(char *str, char *delim)
+char **get_tokens(char *input)
 {
-	char **tokenArr = NULL;
-	size_t str_len = 0;
-	int num_of_tokens = 0;
-	char *str_copy = NULL;
+	int buffer_size = 128;
+	int index = 0;
+	char *token;
+	char **token_arr;
 
-	if (!(str && delim))
+	token_arr = malloc(buffer_size * sizeof(char *));
+
+	if (!token_arr)
 	{
-		perror("wrong format");
+		perror("Memory alloc error");
 		exit(EXIT_FAILURE);
 	}
+	token = strtok(input, DELIM);
 
-	str_len = strlen(str);
-	str_copy = malloc(sizeof(char) * (str_len + 1));
-
-	if (str_copy == NULL)
+	while (token != NULL)
 	{
-		perror("allocate mem");
-		exit(EXIT_FAILURE);
-	}
-
-
-	strcpy(str_copy, str);
-
-	num_of_tokens = count_tokens(str_copy, delim);
-	if (num_of_tokens == 0)
-	{
-		perror("get tokens");
-		exit(EXIT_FAILURE);
-	}
-
-	tokenArr = get_tokens(str, delim, num_of_tokens);
-	free(str_copy);
-	return (tokenArr);
-}
-
-
-/**
- * count_tokens - counts the tokens in string
- * @trans: string to counts
- * @delim: delimitor
- *
- * Return: number of tokens
- */
-size_t count_tokens(char *trans, char *delim)
-{
-
-	size_t num_of_tokens = 0;
-
-	if (!(trans && delim))
-		return (0);
-
-	if (strtok(trans, delim))
-		num_of_tokens++;
-	while (strtok(NULL, delim))
-		num_of_tokens++;
-	return (num_of_tokens);
-}
-
-
-/**
- * get_tokens - creates tokens based on number
- * @trans: string to breaks
- * @delim: delimitor
- * @number_of_tokens: expected number of tokens
- *
- * Return: pointer to string array
- */
-char **get_tokens(char *trans, char *delim, int number_of_tokens)
-{
-
-	char **token_arr = NULL;
-	size_t index = 0;
-	size_t num = number_of_tokens;
-
-	if (!(trans && delim))
-		return (0);
-
-	token_arr = malloc(sizeof(char *) * (num + 1));
-	if (token_arr == NULL)
-		return (NULL);
-
-	token_arr[index] = strtok(trans, delim);
-
-	index++;
-	while (index < num)
-	{
-		token_arr[index] = strtok(NULL, delim);
+		token_arr[index] = token;
 		index++;
-	}
+		if (index >= buffer_size)
+		{
+			buffer_size += buffer_size;
+			token_arr = realloc(token_arr, buffer_size * sizeof(char *));
 
+			if (token_arr == NULL)
+			{
+				perror("Memory realloc error");
+				exit(EXIT_FAILURE);
+			}
+		}
+		token = strtok(NULL, DELIM);
+	}
 	token_arr[index] = NULL;
 	return (token_arr);
 }
+
+
 

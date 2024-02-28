@@ -1,81 +1,106 @@
 #include "main.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <unistd.h>
+
+/**
+ * exec_command - executes command
+ * @ags: arguments
+ * @name: prog name
+ *
+ * Return: status
+ */
+int exec_command(char **ags, char *name)
+{
+	unsigned long int index;
+	char *built_ins[] = {
+		"exit",
+		"env",
+		"cd"
+	};
+	int (*built_in_funct[])(char **) = {
+		&handle_exit,
+		&_env,
+		&_cd
+	};
+
+	if (!ags)
+	{
+		return (-1);
+	}
+
+	for (index = 0; index < sizeof(built_ins) / sizeof(char *); index++)
+	{
+		if (strcmp(ags[0], built_ins[index]) == 0)
+		{
+			return ((*built_in_funct[index])(ags));
+		}
+	}
+	return (s_call(ags, name));
+}
 
 
 /**
- * execute - executes command
- * @command: string command
- * @name: program name
+ * handle_exec_cmd - handles cmd Execution
+ * @cmd_ags: command tokens
  *
  * Return: nothing
  */
-void execute(char *command, char *name)
+void handle_exec_cmd(char **cmd_ags)
 {
-	char **tokens;
-	int status;
-
-	tokens = parse_command_line(command);
-	status = execute_command(tokens, name);
-	if (status != -1)
-	{
-		perror(name);
-	}
-	free(tokens);
+	execvp(cmd_ags[0], cmd_ags);
+	perror("Execution error");
+	exit(EXIT_FAILURE);
 }
 
+
 /**
- * execute_command - executes user command
- * @command: user command in tokens
- * @name: name of program
+ * access_command - gets the command
+ * @path: path to command
+ * @ags: arguments
  *
  * Return: int
  */
-int execute_command(char **command, char *name)
+int access_command(char *path, char **ags)
 {
+
 	pid_t pid;
 	int status;
-
-	char *path_to_command = get_command_file(command[0]);
-
-	if (!path_to_command)
-		return (0);
+	int process_status;
+	pid_t err_pid;
 
 	pid = fork();
-	if (pid == -1)
-		return (0);
-
 	if (pid == 0)
 	{
-		if (execve(path_to_command, command, environ) == -1)
+		process_status = execve(path, ags, environ);
+		if (process_status == -1)
 		{
-			perror(name);
-			/* free(str); */
-			/* free(path_to_command); */
-			/* free(command); */
+			return (-1);
 		}
-		exit(EXIT_FAILURE);
+	} else if (pid > 0)
+	{
+		err_pid = waitpid(pid, &status, WUNTRACED);
+		if (err_pid == -1)
+		{
+			perror("Child process error");
+			return (-1);
+		}
+	} else
+	{
+		perror("Fork error");
+		return (-1);
 	}
-	waitpid(pid, &status, WUNTRACED);
-	free(path_to_command);
 	return (-1);
 }
 
-/**
- * get_command_file - command file
- * @_command_name: command name
- *
- * Return: path to command file
- */
-char *get_command_file(char *_command_name)
-{
-	char *command_name;
 
-	command_name = malloc(sizeof(char) * (strlen(_command_name) + 1));
-	strcpy(command_name, _command_name);
-	return (command_name);
+/**
+ * exec_cmd - calls the sys execve
+ * @cmd_ags: arguments
+ *
+ * Return: nothing
+ */
+void exec_cmd(char **cmd_ags)
+{
+	execvp(cmd_ags[0], cmd_ags);
+	perror("Eecution error");
+	exit(EXIT_FAILURE);
 }
+
