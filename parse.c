@@ -1,4 +1,34 @@
 #include "main.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+
+/**
+ * get_line - gets line from stdin
+ *
+ * Return: string
+ */
+char *get_line()
+{
+	char *line = NULL;
+	size_t buff_size = 0;
+
+	if (getline(&line, &buff_size, stdin) == -1)
+	{
+		if (feof(stdin))
+		{
+			free(line);
+			exit(EXIT_SUCCESS);
+		}
+		else
+		{
+			free(line);
+			perror("error read line");
+			exit(EXIT_FAILURE);
+		}
+	}
+	return (line);
+}
 
 /**
  * parse_command_line - parses the user input
@@ -34,19 +64,29 @@ char **tokenize(char *str, char *delim)
 	char *str_copy = NULL;
 
 	if (!(str && delim))
-		return (tokenArr);
+	{
+		perror("wrong format");
+		exit(EXIT_FAILURE);
+	}
 
 	str_len = strlen(str);
 	str_copy = malloc(sizeof(char) * (str_len + 1));
 
 	if (str_copy == NULL)
-		return (tokenArr);
+	{
+		perror("allocate mem");
+		exit(EXIT_FAILURE);
+	}
+
 
 	strcpy(str_copy, str);
 
 	num_of_tokens = count_tokens(str_copy, delim);
 	if (num_of_tokens == 0)
-		return (tokenArr);
+	{
+		perror("get tokens");
+		exit(EXIT_FAILURE);
+	}
 
 	tokenArr = get_tokens(str, delim, num_of_tokens);
 	free(str_copy);

@@ -14,15 +14,19 @@
 
 extern char **environ;
 
+char *get_line(void);
+
+char *get_stream(void);
+
 char **parse_command_line(char *);
 
 void interactive_mode(char *name);
 
-void non_interactive_mode(char *name, int fd);
+void non_interactive_mode(char *name);
 
-void execute(char *command);
+void execute(char *command, char *name);
 
-int execute_command(char **command, char *name, char *str);
+int execute_command(char **command, char *name);
 
 char *get_command_file(char *path);
 

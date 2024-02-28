@@ -6,15 +6,35 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+
+/**
+ * execute - executes command
+ * @command: string command
+ * @name: program name
+ *
+ * Return: nothing
+ */
+void execute(char *command, char *name)
+{
+	char **tokens;
+	int status;
+
+	tokens = parse_command_line(command);
+	status = execute_command(tokens, name);
+	if (status != -1)
+	{
+		perror(name);
+	}
+}
+
 /**
  * execute_command - executes user command
  * @command: user command in tokens
  * @name: name of program
- * @str: pointer to user str
  *
  * Return: int
  */
-int execute_command(char **command, char *name, char *str)
+int execute_command(char **command, char *name)
 {
 	pid_t pid;
 	int status;
@@ -30,18 +50,18 @@ int execute_command(char **command, char *name, char *str)
 
 	if (pid == 0)
 	{
-		if (execve(path_to_command, command, NULL) == -1)
+		if (execve(path_to_command, command, environ) == -1)
 		{
 			perror(name);
-			free(str);
-			free(path_to_command);
-			free(command);
-			exit(EXIT_FAILURE);
+			/* free(str); */
+			/* free(path_to_command); */
+			/* free(command); */
 		}
+		exit(EXIT_FAILURE);
 	}
-	wait(&status);
+	waitpid(pid, &status, WUNTRACED);
 	free(path_to_command);
-	return (status);
+	return (-1);
 }
 
 /**
