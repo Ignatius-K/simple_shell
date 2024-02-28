@@ -1,0 +1,3 @@
+/usr/bin/ls
+/usr/bin/which which
+/usr/bin/ls -la

@@ -25,6 +25,7 @@ void execute(char *command, char *name)
 	{
 		perror(name);
 	}
+	free(tokens);
 }
 
 /**
