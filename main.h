@@ -10,12 +10,19 @@
 #include <time.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 
 extern char **environ;
 
 char **parse_command_line(char *);
 
-int execute_command(char **command, char *str);
+void interactive_mode(char *name);
+
+void non_interactive_mode(char *name, int fd);
+
+void execute(char *command);
+
+int execute_command(char **command, char *name, char *str);
 
 char *get_command_file(char *path);
 

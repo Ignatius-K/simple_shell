@@ -1,4 +1,5 @@
 #include "main.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
@@ -8,11 +9,12 @@
 /**
  * execute_command - executes user command
  * @command: user command in tokens
+ * @name: name of program
  * @str: pointer to user str
  *
  * Return: int
  */
-int execute_command(char **command, char *str)
+int execute_command(char **command, char *name, char *str)
 {
 	pid_t pid;
 	int status;
@@ -30,6 +32,7 @@ int execute_command(char **command, char *str)
 	{
 		if (execve(path_to_command, command, NULL) == -1)
 		{
+			perror(name);
 			free(str);
 			free(path_to_command);
 			free(command);
